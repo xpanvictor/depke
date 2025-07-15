@@ -1,4 +1,4 @@
-# Double Edged Private Key Encryption (DEKPE)
+# Double Edged Private Key Encryption (DEPKE)
 
 ## Abstract
 [Todo]
