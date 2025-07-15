@@ -30,23 +30,24 @@ fn main() {
     // encrypt
     let shared_a = privA.diffie_hellman(&pubB);
     let key_a = hkdf_derive(shared_a.as_bytes(), &some_hash);
-    let cipher = ChaCha20Poly1305::new(&key_a.into());
+    let cipher_a = ChaCha20Poly1305::new(&key_a.into());
     let nonce_w = [0u8; 12];
     let nonce = Nonce::from_slice(&nonce_w);
-    let cipher_text = cipher
+    let cipher_text = cipher_a
         .encrypt(Nonce::from_slice(&nonce), msg as &[u8])
         .unwrap();
 
     // decrypt
     let shared_b = privB.diffie_hellman(&pubA);
     let key_b = hkdf_derive(shared_b.as_bytes(), &some_hash);
+    let cipher_b = ChaCha20Poly1305::new(&key_b.into());
 
-    let plain = cipher.decrypt(nonce, cipher_text.as_ref()).unwrap();
+    let plain = cipher_b.decrypt(nonce, cipher_text.as_ref()).unwrap();
 
     let plain_text = String::from_utf8(plain).unwrap();
 
     // try decrypt with A
-    let plain_a = cipher.decrypt(nonce, cipher_text.as_ref()).unwrap();
+    let plain_a = cipher_a.decrypt(nonce, cipher_text.as_ref()).unwrap();
     let plain_a_text = String::from_utf8(plain_a).unwrap();
 
     // print
