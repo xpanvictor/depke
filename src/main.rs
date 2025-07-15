@@ -17,18 +17,18 @@ fn hkdf_derive(shared_secret: &[u8], context: &[u8]) -> [u8; 32] {
 }
 
 fn main() {
-    let privA = EphemeralSecret::random();
-    let pubA = PublicKey::from(&privA);
+    let priv_a = EphemeralSecret::random();
+    let pub_a = PublicKey::from(&priv_a);
 
-    let privB = EphemeralSecret::random();
-    let pubB = PublicKey::from(&privB);
+    let priv_b = EphemeralSecret::random();
+    let pub_b = PublicKey::from(&priv_b);
 
     // M
     let msg = b"Hello world";
     let some_hash = Sha256::digest(b"even_any");
 
     // encrypt
-    let shared_a = privA.diffie_hellman(&pubB);
+    let shared_a = priv_a.diffie_hellman(&pub_b);
     let key_a = hkdf_derive(shared_a.as_bytes(), &some_hash);
     let cipher_a = ChaCha20Poly1305::new(&key_a.into());
     let nonce_w = [0u8; 12];
@@ -38,7 +38,7 @@ fn main() {
         .unwrap();
 
     // decrypt
-    let shared_b = privB.diffie_hellman(&pubA);
+    let shared_b = priv_b.diffie_hellman(&pub_a);
     let key_b = hkdf_derive(shared_b.as_bytes(), &some_hash);
     let cipher_b = ChaCha20Poly1305::new(&key_b.into());
 
