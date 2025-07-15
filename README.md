@@ -17,3 +17,4 @@ msg = Hello world
 plain_text = Hello world 
 
 Plain text is after decryption
+Sender can still decrypt with his generated shared key hence it's bidirectional.

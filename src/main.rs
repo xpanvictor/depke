@@ -31,7 +31,8 @@ fn main() {
     let shared_a = privA.diffie_hellman(&pubB);
     let key_a = hkdf_derive(shared_a.as_bytes(), &some_hash);
     let cipher = ChaCha20Poly1305::new(&key_a.into());
-    let nonce = [0u8; 12];
+    let nonce_w = [0u8; 12];
+    let nonce = Nonce::from_slice(&nonce_w);
     let cipher_text = cipher
         .encrypt(Nonce::from_slice(&nonce), msg as &[u8])
         .unwrap();
@@ -40,15 +41,23 @@ fn main() {
     let shared_b = privB.diffie_hellman(&pubA);
     let key_b = hkdf_derive(shared_b.as_bytes(), &some_hash);
 
-    let plain = cipher
-        .decrypt(Nonce::from_slice(&nonce), cipher_text.as_ref())
-        .unwrap();
+    let plain = cipher.decrypt(nonce, cipher_text.as_ref()).unwrap();
 
     let plain_text = String::from_utf8(plain).unwrap();
+
+    // try decrypt with A
+    let plain_a = cipher.decrypt(nonce, cipher_text.as_ref()).unwrap();
+    let plain_a_text = String::from_utf8(plain_a).unwrap();
 
     // print
     println!("A - {:?}; B - {:?}", key_a, key_b);
     println!("{}", plain_text);
+    println!("Plain_a: {}", plain_a_text);
 
     assert_eq!(msg, plain_text.as_bytes(), "DEPKE failed!");
+    assert_eq!(
+        msg,
+        plain_a_text.as_bytes(),
+        "DEPKE (bidirectional) failed!"
+    );
 }
